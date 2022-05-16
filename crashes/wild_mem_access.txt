@@ -1,0 +1,226 @@
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Not Ready [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Medium not present
+sr 1:0:0:0: [sr0] tag#0 CDB: Read(10) 28 00 00 00 00 00 00 00 40 00
+I/O error, dev sr0, sector 0 op 0x0:(READ) flags 0x204000 phys_seg 4 prio class 2
+==================================================================
+BUG: KASAN: wild-memory-access in instrument_atomic_read include/linux/instrumented.h:71 [inline]
+BUG: KASAN: wild-memory-access in test_bit include/asm-generic/bitops/instrumented-non-atomic.h:134 [inline]
+BUG: KASAN: wild-memory-access in bio_poll+0xb2/0x330 block/blk-core.c:985
+Read of size 8 at addr dead000000000160 by task syz-executor.7/3873
+
+CPU: 0 PID: 3873 Comm: syz-executor.7 Not tainted 5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ __kasan_report mm/kasan/report.c:446 [inline]
+ kasan_report.cold+0x116/0x11b mm/kasan/report.c:459
+ check_region_inline mm/kasan/generic.c:183 [inline]
+ kasan_check_range+0x14d/0x1d0 mm/kasan/generic.c:189
+ instrument_atomic_read include/linux/instrumented.h:71 [inline]
+ test_bit include/asm-generic/bitops/instrumented-non-atomic.h:134 [inline]
+ bio_poll+0xb2/0x330 block/blk-core.c:985
+ iocb_bio_iopoll+0x77/0xb0 block/blk-core.c:1035
+ io_do_iopoll+0x256/0xe30 fs/io_uring.c:2629
+ io_iopoll_try_reap_events+0xa4/0xf6 fs/io_uring.c:2683
+ io_ring_ctx_wait_and_kill+0x15f/0x27e fs/io_uring.c:9675
+ io_uring_release+0x42/0x46 fs/io_uring.c:9692
+ __fput+0x21e/0x940 fs/file_table.c:317
+ task_work_run+0xe1/0x180 kernel/task_work.c:164
+ exit_task_work include/linux/task_work.h:32 [inline]
+ do_exit+0x979/0x2730 kernel/exit.c:806
+ do_group_exit+0xb5/0x2a0 kernel/exit.c:935
+ get_signal+0x382/0x1ca0 kernel/signal.c:2863
+ arch_do_signal_or_restart+0x2f8/0x17b0 arch/x86/kernel/signal.c:868
+ handle_signal_work kernel/entry/common.c:148 [inline]
+ exit_to_user_mode_loop kernel/entry/common.c:172 [inline]
+ exit_to_user_mode_prepare+0xe8/0x150 kernel/entry/common.c:207
+ __syscall_exit_to_user_mode_work kernel/entry/common.c:289 [inline]
+ syscall_exit_to_user_mode+0x1d/0x40 kernel/entry/common.c:300
+ do_syscall_64+0x48/0x90 arch/x86/entry/common.c:86
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+RIP: 0033:0x7f44dac2283d
+Code: Unable to access opcode bytes at RIP 0x7f44dac22813.
+RSP: 002b:00007f44d9d94c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f44dad41f60 RCX: 00007f44dac2283d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f44dad41f68
+RBP: 00007f44dad41f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f44dad41f6c
+R13: 00007ffd299a85ff R14: 00007ffd299a87a0 R15: 00007f44d9d94d80
+ </TASK>
+==================================================================
+general protection fault, probably for non-canonical address 0xfbd59c000000002c: 0000 [#1] PREEMPT SMP KASAN PTI
+KASAN: maybe wild-memory-access in range [0xdead000000000160-0xdead000000000167]
+CPU: 0 PID: 3873 Comm: syz-executor.7 Tainted: G    B             5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+RIP: 0010:constant_test_bit arch/x86/include/asm/bitops.h:207 [inline]
+RIP: 0010:test_bit include/asm-generic/bitops/instrumented-non-atomic.h:135 [inline]
+RIP: 0010:bio_poll+0xc3/0x330 block/blk-core.c:985
+Code: 00 48 8b 9b 40 03 00 00 be 08 00 00 00 4c 8d 63 60 4c 89 e7 e8 ce 48 93 ff 4c 89 e2 48 b8 00 00 00 00 00 fc ff df 48 c1 ea 03 <80> 3c 02 00 0f 85 e8 01 00 00 48 8b 43 60 a9 00 00 01 00 0f 84 25
+RSP: 0018:ffff88802f757828 EFLAGS: 00010a02
+RAX: dffffc0000000000 RBX: dead000000000100 RCX: 0000000000000000
+RDX: 1bd5a0000000002c RSI: 0000000000000246 RDI: 0000000000000001
+RBP: 0000000000000000 R08: 0000000000000000 R09: fffffbfff6dd7d61
+R10: ffffffffb6ebeb07 R11: fffffbfff6dd7d60 R12: dead000000000160
+R13: ffff88802f757900 R14: 0000000000000003 R15: ffff8880048cda00
+FS:  0000000000000000(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 000055555719a0b8 CR3: 00000000091ee005 CR4: 0000000000170ef0
+DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000600
+Call Trace:
+ <TASK>
+ iocb_bio_iopoll+0x77/0xb0 block/blk-core.c:1035
+ io_do_iopoll+0x256/0xe30 fs/io_uring.c:2629
+ io_iopoll_try_reap_events+0xa4/0xf6 fs/io_uring.c:2683
+ io_ring_ctx_wait_and_kill+0x15f/0x27e fs/io_uring.c:9675
+ io_uring_release+0x42/0x46 fs/io_uring.c:9692
+ __fput+0x21e/0x940 fs/file_table.c:317
+ task_work_run+0xe1/0x180 kernel/task_work.c:164
+ exit_task_work include/linux/task_work.h:32 [inline]
+ do_exit+0x979/0x2730 kernel/exit.c:806
+ do_group_exit+0xb5/0x2a0 kernel/exit.c:935
+ get_signal+0x382/0x1ca0 kernel/signal.c:2863
+ arch_do_signal_or_restart+0x2f8/0x17b0 arch/x86/kernel/signal.c:868
+ handle_signal_work kernel/entry/common.c:148 [inline]
+ exit_to_user_mode_loop kernel/entry/common.c:172 [inline]
+ exit_to_user_mode_prepare+0xe8/0x150 kernel/entry/common.c:207
+ __syscall_exit_to_user_mode_work kernel/entry/common.c:289 [inline]
+ syscall_exit_to_user_mode+0x1d/0x40 kernel/entry/common.c:300
+ do_syscall_64+0x48/0x90 arch/x86/entry/common.c:86
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+RIP: 0033:0x7f44dac2283d
+Code: Unable to access opcode bytes at RIP 0x7f44dac22813.
+RSP: 002b:00007f44d9d94c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f44dad41f60 RCX: 00007f44dac2283d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f44dad41f68
+RBP: 00007f44dad41f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f44dad41f6c
+R13: 00007ffd299a85ff R14: 00007ffd299a87a0 R15: 00007f44d9d94d80
+ </TASK>
+Modules linked in:
+---[ end trace 0000000000000000 ]---
+RIP: 0010:constant_test_bit arch/x86/include/asm/bitops.h:207 [inline]
+RIP: 0010:test_bit include/asm-generic/bitops/instrumented-non-atomic.h:135 [inline]
+RIP: 0010:bio_poll+0xc3/0x330 block/blk-core.c:985
+Code: 00 48 8b 9b 40 03 00 00 be 08 00 00 00 4c 8d 63 60 4c 89 e7 e8 ce 48 93 ff 4c 89 e2 48 b8 00 00 00 00 00 fc ff df 48 c1 ea 03 <80> 3c 02 00 0f 85 e8 01 00 00 48 8b 43 60 a9 00 00 01 00 0f 84 25
+RSP: 0018:ffff88802f757828 EFLAGS: 00010a02
+RAX: dffffc0000000000 RBX: dead000000000100 RCX: 0000000000000000
+RDX: 1bd5a0000000002c RSI: 0000000000000246 RDI: 0000000000000001
+RBP: 0000000000000000 R08: 0000000000000000 R09: fffffbfff6dd7d61
+R10: ffffffffb6ebeb07 R11: fffffbfff6dd7d60 R12: dead000000000160
+R13: ffff88802f757900 R14: 0000000000000003 R15: ffff8880048cda00
+FS:  0000000000000000(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 000055555719a0b8 CR3: 00000000091ee005 CR4: 0000000000170ef0
+DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000600
+Fixing recursive fault but reboot is needed!
+BUG: using smp_processor_id() in preemptible [00000000] code: syz-executor.7/3873
+caller is __schedule+0x7c/0x18e0 kernel/sched/core.c:6191
+CPU: 0 PID: 3873 Comm: syz-executor.7 Tainted: G    B D           5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ check_preemption_disabled+0x103/0x110 lib/smp_processor_id.c:49
+ __schedule+0x7c/0x18e0 kernel/sched/core.c:6191
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f44dac2283d
+Code: Unable to access opcode bytes at RIP 0x7f44dac22813.
+RSP: 002b:00007f44d9d94c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f44dad41f60 RCX: 00007f44dac2283d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f44dad41f68
+RBP: 00007f44dad41f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f44dad41f6c
+R13: 00007ffd299a85ff R14: 00007ffd299a87a0 R15: 00007f44d9d94d80
+ </TASK>
+BUG: scheduling while atomic: syz-executor.7/3873/0x00000000
+Modules linked in:
+Preemption disabled at:
+[<0000000000000000>] 0x0
+CPU: 0 PID: 3873 Comm: syz-executor.7 Tainted: G    B D           5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ __schedule_bug.cold+0x11e/0x12e kernel/sched/core.c:5539
+ schedule_debug kernel/sched/core.c:5566 [inline]
+ __schedule+0x11c5/0x18e0 kernel/sched/core.c:6195
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f44dac2283d
+Code: Unable to access opcode bytes at RIP 0x7f44dac22813.
+RSP: 002b:00007f44d9d94c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f44dad41f60 RCX: 00007f44dac2283d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f44dad41f68
+RBP: 00007f44dad41f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f44dad41f6c
+R13: 00007ffd299a85ff R14: 00007ffd299a87a0 R15: 00007f44d9d94d80
+ </TASK>
+------------[ cut here ]------------
+Voluntary context switch within RCU read-side critical section!
+WARNING: CPU: 0 PID: 3873 at kernel/rcu/tree_plugin.h:318 rcu_note_context_switch+0xd8e/0x1660 kernel/rcu/tree_plugin.h:318
+Modules linked in:
+CPU: 0 PID: 3873 Comm: syz-executor.7 Tainted: G    B D W         5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+RIP: 0010:rcu_note_context_switch+0xd8e/0x1660 kernel/rcu/tree_plugin.h:318
+Code: df 48 c1 ea 03 80 3c 02 00 0f 85 d3 04 00 00 4c 89 2e e9 eb f9 ff ff 48 c7 c7 40 bd 46 b5 c6 05 df f0 c9 03 01 e8 15 b4 4f 02 <0f> 0b e9 19 f3 ff ff 48 89 ef e8 f3 45 36 00 e9 bc f3 ff ff e8 09
+RSP: 0018:ffff88802f757db8 EFLAGS: 00010082
+RAX: 0000000000000000 RBX: ffff88806d2368c0 RCX: 0000000000000000
+RDX: ffff8880093ba180 RSI: 0000000000000000 RDI: ffffed1005eeafa9
+RBP: ffff8880093ba180 R08: 0000000000000001 R09: ffffed100da44eb2
+R10: ffff88806d22758b R11: ffffed100da44eb1 R12: 0000000000000000
+R13: ffff8880093ba180 R14: 0000000000000000 R15: ffff88806d235bc0
+FS:  0000000000000000(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 000055555719a0b8 CR3: 00000000091ee005 CR4: 0000000000170ef0
+DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000600
+Call Trace:
+ <TASK>
+ __schedule+0x132/0x18e0 kernel/sched/core.c:6201
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f44dac2283d
+Code: Unable to access opcode bytes at RIP 0x7f44dac22813.
+RSP: 002b:00007f44d9d94c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f44dad41f60 RCX: 00007f44dac2283d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f44dad41f68
+RBP: 00007f44dad41f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f44dad41f6c
+R13: 00007ffd299a85ff R14: 00007ffd299a87a0 R15: 00007f44d9d94d80
+ </TASK>
+---[ end trace 0000000000000000 ]---
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Not Ready [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Medium not present
+sr 1:0:0:0: [sr0] tag#0 CDB: Read(10) 28 00 00 00 00 40 00 00 40 00
+I/O error, dev sr0, sector 256 op 0x0:(READ) flags 0x204000 phys_seg 3 prio class 2
+----------------
+Code disassembly (best guess):
+   0:	00 48 8b             	add    %cl,-0x75(%rax)
+   3:	9b                   	fwait
+   4:	40 03 00             	rex add (%rax),%eax
+   7:	00 be 08 00 00 00    	add    %bh,0x8(%rsi)
+   d:	4c 8d 63 60          	lea    0x60(%rbx),%r12
+  11:	4c 89 e7             	mov    %r12,%rdi
+  14:	e8 ce 48 93 ff       	callq  0xff9348e7
+  19:	4c 89 e2             	mov    %r12,%rdx
+  1c:	48 b8 00 00 00 00 00 	movabs $0xdffffc0000000000,%rax
+  23:	fc ff df
+  26:	48 c1 ea 03          	shr    $0x3,%rdx
+* 2a:	80 3c 02 00          	cmpb   $0x0,(%rdx,%rax,1) <-- trapping instruction
+  2e:	0f 85 e8 01 00 00    	jne    0x21c
+  34:	48 8b 43 60          	mov    0x60(%rbx),%rax
+  38:	a9 00 00 01 00       	test   $0x10000,%eax
+  3d:	0f                   	.byte 0xf
+  3e:	84                   	.byte 0x84
+  3f:	25                   	.byte 0x25

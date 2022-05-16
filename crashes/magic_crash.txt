@@ -1,0 +1,156 @@
+[   77.370628] doing iopoll on request at 0xFFFF888008B7B480 (kiocb is 0xFFFF888008B7B480, private is 0x4C414954494E495F)
+[   77.372396] bio is 0x4C414954494E495F
+[   77.373104] general protection fault, probably for non-canonical address 0xe988252a8929c92c: 0000 [#1] PREEMPT SMP KASAN PTI
+[   77.374929] KASAN: maybe wild-memory-access in range [0x4c414954494e4960-0x4c414954494e4967]
+[   77.376298] CPU: 0 PID: 609 Comm: test2 Not tainted 5.17.0-rc6-00183-gb08968f196d4-dirty #21
+[   77.377703] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.0-0-gd239552ce722-prebuilt.qemu.org 04/01/2014
+[   77.379564] RIP: 0010:iocb_bio_iopoll.cold.52+0x19/0x7c
+[   77.380457] Code: e8 b7 79 93 fd e9 04 6d 39 fe e8 ed a9 c7 fd eb b3 e8 b6 14 9c fd 4c 8d 6b 08 b8 ff ff 37 00 4c 89 ea 48 c1 e0 2a 48 c1 ea 03 <80> 3c 02 00 75 53 f
+[   77.383470] RSP: 0018:ffffc9000072fb68 EFLAGS: 00010203
+[   77.384338] RAX: dffffc0000000000 RBX: 4c414954494e495f RCX: ffff88800e2c9d80
+[   77.385523] RDX: 0988292a8929c92c RSI: ffff88800e2c9d80 RDI: 0000000000000002
+[   77.386691] RBP: ffffc9000072fc00 R08: ffffffff83a017da R09: 0000000000000000
+[   77.387854] R10: 0000000000000005 R11: 0000000000000000 R12: 0000000000000003
+[   77.389017] R13: 4c414954494e4967 R14: ffff888006e20000 R15: ffff888008b7b4f8
+[   77.390189] FS:  00007f4e065d5580(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+[   77.391508] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   77.392455] CR2: 00007fc4c7ab6000 CR3: 000000000ad0c000 CR4: 00000000000006b0
+[   77.393622] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[   77.394783] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[   77.395935] Call Trace:
+[   77.396341]  <TASK>
+[   77.396702]  io_do_iopoll.cold.167+0x9b/0x215
+[   77.397449]  ? ctx_flush_and_put+0x210/0x210
+[   77.398181]  ? _raw_spin_unlock+0x34/0x50
+[   77.398857]  io_iopoll_try_reap_events+0xa8/0x11d
+[   77.399642]  io_ring_ctx_wait_and_kill+0x16f/0x28b
+[   77.400439]  ? io_iopoll_try_reap_events+0x11d/0x11d
+[   77.401276]  ? write_comp_data+0x1f/0x70
+[   77.401939]  ? io_ring_ctx_wait_and_kill+0x28b/0x28b
+[   77.402766]  io_uring_release+0x42/0x46
+[   77.403417]  __fput+0x24b/0x960
+[   77.403971]  task_work_run+0xe0/0x190
+[   77.404593]  do_exit+0xa08/0x2ba0
+[   77.405165]  ? is_current_pgrp_orphaned+0x90/0x90
+[   77.405958]  ? find_vma+0x71/0x1e0
+[   77.406528]  ? up_read+0xf/0x90
+[   77.407069]  ? write_comp_data+0x1f/0x70
+[   77.407735]  ? do_user_addr_fault+0x560/0x1280
+[   77.408483]  do_group_exit+0xc4/0x2c0
+[   77.412233]  __x64_sys_exit_group+0x3a/0x50
+[   77.412951]  do_syscall_64+0x34/0x80
+[   77.413574]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+[   77.414431] RIP: 0033:0x7f4e060d5618
+[   77.415048] Code: Unable to access opcode bytes at RIP 0x7f4e060d55ee.
+[   77.416112] RSP: 002b:00007ffec5e993b8 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+[   77.417364] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f4e060d5618
+[   77.418510] RDX: 0000000000000000 RSI: 000000000000003c RDI: 0000000000000000
+[   77.419663] RBP: 00007f4e063b28e0 R08: 00000000000000e7 R09: fffffffffffffec8
+[   77.420835] R10: 00007ffec5e99338 R11: 0000000000000246 R12: 00007f4e063b28e0
+[   77.422012] R13: 00007f4e063b7c20 R14: 0000000000000000 R15: 0000000000000000
+[   77.423174]  </TASK>
+[   77.423552] Modules linked in:
+[   77.424116] ---[ end trace 0000000000000000 ]---
+[   77.424904] RIP: 0010:iocb_bio_iopoll.cold.52+0x19/0x7c
+[   77.425813] Code: e8 b7 79 93 fd e9 04 6d 39 fe e8 ed a9 c7 fd eb b3 e8 b6 14 9c fd 4c 8d 6b 08 b8 ff ff 37 00 4c 89 ea 48 c1 e0 2a 48 c1 ea 03 <80> 3c 02 00 75 53 f
+[   77.428870] RSP: 0018:ffffc9000072fb68 EFLAGS: 00010203
+[   77.429766] RAX: dffffc0000000000 RBX: 4c414954494e495f RCX: ffff88800e2c9d80
+[   77.430960] RDX: 0988292a8929c92c RSI: ffff88800e2c9d80 RDI: 0000000000000002
+[   77.432149] RBP: ffffc9000072fc00 R08: ffffffff83a017da R09: 0000000000000000
+[   77.433350] R10: 0000000000000005 R11: 0000000000000000 R12: 0000000000000003
+[   77.434539] R13: 4c414954494e4967 R14: ffff888006e20000 R15: ffff888008b7b4f8
+[   77.435726] FS:  00007f4e065d5580(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+[   77.437066] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   77.438032] CR2: 00007fc4c7ab6000 CR3: 000000000ad0c000 CR4: 00000000000006b0
+[   77.439210] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[   77.440387] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[   77.441572] Fixing recursive fault but reboot is needed!
+[   77.442446] BUG: using smp_processor_id() in preemptible [00000000] code: test2/609
+[   77.443701] caller is __schedule+0x80/0x1940
+[   77.444417] CPU: 0 PID: 609 Comm: test2 Tainted: G      D           5.17.0-rc6-00183-gb08968f196d4-dirty #21
+[   77.446011] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.0-0-gd239552ce722-prebuilt.qemu.org 04/01/2014
+[   77.447837] Call Trace:
+[   77.448245]  <TASK>
+[   77.448602]  dump_stack_lvl+0x70/0x93
+[   77.449235]  check_preemption_disabled+0x158/0x170
+[   77.450044]  __schedule+0x80/0x1940
+[   77.450632]  ? __sanitizer_cov_trace_pc+0x1a/0x40
+[   77.451416]  ? io_schedule_timeout+0x140/0x140
+[   77.452157]  ? _raw_read_lock_bh+0x40/0x40
+[   77.452850]  do_task_dead+0x9b/0xc0
+[   77.453452]  make_task_dead.cold.46+0xcf/0x1ce
+[   77.454206]  rewind_stack_and_make_dead+0x17/0x17
+[   77.454990] RIP: 0033:0x7f4e060d5618
+[   77.455587] Code: Unable to access opcode bytes at RIP 0x7f4e060d55ee.
+[   77.456638] RSP: 002b:00007ffec5e993b8 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+[   77.457870] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f4e060d5618
+[   77.459021] RDX: 0000000000000000 RSI: 000000000000003c RDI: 0000000000000000
+[   77.460171] RBP: 00007f4e063b28e0 R08: 00000000000000e7 R09: fffffffffffffec8
+[   77.461321] R10: 00007ffec5e99338 R11: 0000000000000246 R12: 00007f4e063b28e0
+[   77.462476] R13: 00007f4e063b7c20 R14: 0000000000000000 R15: 0000000000000000
+[   77.463635]  </TASK>
+[   77.464029] BUG: scheduling while atomic: test2/609/0x00000000
+[   77.464989] Modules linked in:
+[   77.465513] Preemption disabled at:
+[   77.465520] [<0000000000000000>] 0x0
+[   77.466708] CPU: 0 PID: 609 Comm: test2 Tainted: G      D           5.17.0-rc6-00183-gb08968f196d4-dirty #21
+[   77.468297] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.0-0-gd239552ce722-prebuilt.qemu.org 04/01/2014
+[   77.470128] Call Trace:
+[   77.470540]  <TASK>
+[   77.470902]  dump_stack_lvl+0x70/0x93
+[   77.471524]  __schedule_bug.cold.165+0xec/0xfc
+[   77.472266]  __schedule+0x1220/0x1940
+[   77.472877]  ? __sanitizer_cov_trace_pc+0x1a/0x40
+[   77.473661]  ? io_schedule_timeout+0x140/0x140
+[   77.474397]  ? _raw_read_lock_bh+0x40/0x40
+[   77.475081]  do_task_dead+0x9b/0xc0
+[   77.475675]  make_task_dead.cold.46+0xcf/0x1ce
+[   77.476418]  rewind_stack_and_make_dead+0x17/0x17
+[   77.477206] RIP: 0033:0x7f4e060d5618
+[   77.477803] Code: Unable to access opcode bytes at RIP 0x7f4e060d55ee.
+[   77.478857] RSP: 002b:00007ffec5e993b8 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+[   77.480082] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f4e060d5618
+[   77.481232] RDX: 0000000000000000 RSI: 000000000000003c RDI: 0000000000000000
+[   77.482383] RBP: 00007f4e063b28e0 R08: 00000000000000e7 R09: fffffffffffffec8
+[   77.483537] R10: 00007ffec5e99338 R11: 0000000000000246 R12: 00007f4e063b28e0
+[   77.484691] R13: 00007f4e063b7c20 R14: 0000000000000000 R15: 0000000000000000
+[   77.485852]  </TASK>
+[   77.486235] ------------[ cut here ]------------
+[   77.486992] Voluntary context switch within RCU read-side critical section!
+[   77.487069] WARNING: CPU: 0 PID: 609 at kernel/rcu/tree_plugin.h:318 rcu_note_context_switch+0xcc7/0x1630
+[   77.489742] Modules linked in:
+[   77.490257] CPU: 0 PID: 609 Comm: test2 Tainted: G      D W         5.17.0-rc6-00183-gb08968f196d4-dirty #21
+[   77.491848] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.0-0-gd239552ce722-prebuilt.qemu.org 04/01/2014
+[   77.493674] RIP: 0010:rcu_note_context_switch+0xcc7/0x1630
+[   77.494586] Code: 03 80 3c 01 00 0f 85 ce 06 00 00 4c 89 b5 90 00 00 00 e9 41 fc ff ff 48 c7 c7 c0 dd 06 84 c6 05 07 43 eb 03 01 e8 ff 58 71 02 <0f> 0b e9 e0 f3 ff 0
+[   77.497566] RSP: 0018:ffffc9000072fdb8 EFLAGS: 00010082
+[   77.498424] RAX: 0000000000000000 RBX: ffff88806d236580 RCX: ffff88800e2c9d80
+[   77.499575] RDX: 0000000000000000 RSI: ffff88800e2c9d80 RDI: 0000000000000002
+[   77.500734] RBP: ffff88800e2c9d80 R08: ffffffff8126a4f5 R09: 0000000000000000
+[   77.501913] R10: 0000000000000005 R11: 0000000000000001 R12: ffff88800e2c9d80
+[   77.503073] R13: 0000000000000000 R14: ffffc90000728000 R15: ffff88800e2c9d80
+[   77.504224] FS:  00007f4e065d5580(0000) GS:ffff88806d200000(0000) knlGS:0000000000000000
+[   77.505535] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   77.506473] CR2: 00007fc4c7ab6000 CR3: 000000000ad0c000 CR4: 00000000000006b0
+[   77.507629] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[   77.508778] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[   77.509936] Call Trace:
+[   77.510354]  <TASK>
+[   77.510718]  ? dump_stack_lvl+0x8b/0x93
+[   77.511367]  __schedule+0x180/0x1940
+[   77.511969]  ? __sanitizer_cov_trace_pc+0x1a/0x40
+[   77.512746]  ? io_schedule_timeout+0x140/0x140
+[   77.513484]  ? _raw_read_lock_bh+0x40/0x40
+[   77.514170]  do_task_dead+0x9b/0xc0
+[   77.514764]  make_task_dead.cold.46+0xcf/0x1ce
+[   77.515510]  rewind_stack_and_make_dead+0x17/0x17
+[   77.516285] RIP: 0033:0x7f4e060d5618
+[   77.516880] Code: Unable to access opcode bytes at RIP 0x7f4e060d55ee.
+[   77.517942] RSP: 002b:00007ffec5e993b8 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+[   77.519168] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f4e060d5618
+[   77.520316] RDX: 0000000000000000 RSI: 000000000000003c RDI: 0000000000000000
+[   77.521474] RBP: 00007f4e063b28e0 R08: 00000000000000e7 R09: fffffffffffffec8
+[   77.522632] R10: 00007ffec5e99338 R11: 0000000000000246 R12: 00007f4e063b28e0
+[   77.523788] R13: 00007f4e063b7c20 R14: 0000000000000000 R15: 0000000000000000
+[   77.524942]  </TASK>
+[   77.525321] ---[ end trace 0000000000000000 ]---

@@ -1,0 +1,299 @@
+sr 1:0:0:0: [sr0] tag#0 CDB: Read(10) 28 00 00 00 07 fe 00 00 40 00
+I/O error, dev sr0, sector 8184 op 0x0:(READ) flags 0x204000 phys_seg 32 prio class 2
+==================================================================
+BUG: KASAN: use-after-free in iocb_bio_iopoll+0x9f/0xb0 block/blk-core.c:1034
+Read of size 8 at addr ffff88800a767a08 by task syz-executor.7/7504
+
+CPU: 1 PID: 7504 Comm: syz-executor.7 Not tainted 5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ print_address_description.constprop.0+0x21/0x150 mm/kasan/report.c:255
+ __kasan_report mm/kasan/report.c:442 [inline]
+ kasan_report.cold+0x7f/0x11b mm/kasan/report.c:459
+ iocb_bio_iopoll+0x9f/0xb0 block/blk-core.c:1034
+ io_do_iopoll+0x256/0xe30 fs/io_uring.c:2629
+ io_iopoll_try_reap_events+0xa4/0xf6 fs/io_uring.c:2683
+ io_ring_ctx_wait_and_kill+0x15f/0x27e fs/io_uring.c:9675
+ io_uring_release+0x42/0x46 fs/io_uring.c:9692
+ __fput+0x21e/0x940 fs/file_table.c:317
+ task_work_run+0xe1/0x180 kernel/task_work.c:164
+ exit_task_work include/linux/task_work.h:32 [inline]
+ do_exit+0x979/0x2730 kernel/exit.c:806
+ do_group_exit+0xb5/0x2a0 kernel/exit.c:935
+ get_signal+0x382/0x1ca0 kernel/signal.c:2863
+ arch_do_signal_or_restart+0x2f8/0x17b0 arch/x86/kernel/signal.c:868
+ handle_signal_work kernel/entry/common.c:148 [inline]
+ exit_to_user_mode_loop kernel/entry/common.c:172 [inline]
+ exit_to_user_mode_prepare+0xe8/0x150 kernel/entry/common.c:207
+ __syscall_exit_to_user_mode_work kernel/entry/common.c:289 [inline]
+ syscall_exit_to_user_mode+0x1d/0x40 kernel/entry/common.c:300
+ do_syscall_64+0x48/0x90 arch/x86/entry/common.c:86
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+RIP: 0033:0x7f37b89a683d
+Code: Unable to access opcode bytes at RIP 0x7f37b89a6813.
+RSP: 002b:00007f37b7b18c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f37b8ac5f60 RCX: 00007f37b89a683d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f37b8ac5f68
+RBP: 00007f37b8ac5f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f37b8ac5f6c
+R13: 00007ffe81305d1f R14: 00007ffe81305ec0 R15: 00007f37b7b18d80
+ </TASK>
+
+Allocated by task 7531:
+ kasan_save_stack+0x1e/0x40 mm/kasan/common.c:38
+ kasan_set_track mm/kasan/common.c:45 [inline]
+ set_alloc_info mm/kasan/common.c:436 [inline]
+ __kasan_slab_alloc+0x66/0x80 mm/kasan/common.c:469
+ kasan_slab_alloc include/linux/kasan.h:260 [inline]
+ slab_post_alloc_hook mm/slab.h:732 [inline]
+ slab_alloc_node mm/slub.c:3230 [inline]
+ slab_alloc mm/slub.c:3238 [inline]
+ kmem_cache_alloc+0xbe/0x1f0 mm/slub.c:3243
+ __d_alloc+0x2a/0x8d0 fs/dcache.c:1769
+ d_alloc+0x40/0x1e0 fs/dcache.c:1848
+ __lookup_hash+0xb8/0x180 fs/namei.c:1604
+ filename_create+0x169/0x420 fs/namei.c:3705
+ do_symlinkat+0xb3/0x210 fs/namei.c:4318
+ __do_sys_symlink fs/namei.c:4350 [inline]
+ __se_sys_symlink fs/namei.c:4348 [inline]
+ __x64_sys_symlink+0x75/0x90 fs/namei.c:4348
+ do_syscall_x64 arch/x86/entry/common.c:50 [inline]
+ do_syscall_64+0x3b/0x90 arch/x86/entry/common.c:80
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+
+Freed by task 406:
+ kasan_save_stack+0x1e/0x40 mm/kasan/common.c:38
+ kasan_set_track+0x21/0x30 mm/kasan/common.c:45
+ kasan_set_free_info+0x20/0x30 mm/kasan/generic.c:370
+ ____kasan_slab_free mm/kasan/common.c:366 [inline]
+ ____kasan_slab_free mm/kasan/common.c:328 [inline]
+ __kasan_slab_free+0xf9/0x130 mm/kasan/common.c:374
+ kasan_slab_free include/linux/kasan.h:236 [inline]
+ slab_free_hook mm/slub.c:1728 [inline]
+ slab_free_freelist_hook mm/slub.c:1754 [inline]
+ slab_free mm/slub.c:3509 [inline]
+ kmem_cache_free+0x97/0x2a0 mm/slub.c:3526
+ rcu_do_batch kernel/rcu/tree.c:2527 [inline]
+ rcu_core+0x599/0x1750 kernel/rcu/tree.c:2778
+ __do_softirq+0x1b1/0x59d kernel/softirq.c:558
+
+Last potentially related work creation:
+ kasan_save_stack+0x1e/0x40 mm/kasan/common.c:38
+ __kasan_record_aux_stack+0x97/0xa0 mm/kasan/generic.c:348
+ __call_rcu kernel/rcu/tree.c:3026 [inline]
+ call_rcu+0x76/0x820 kernel/rcu/tree.c:3106
+ dentry_free+0xb2/0x140 fs/dcache.c:377
+ __dentry_kill+0x3be/0x540 fs/dcache.c:621
+ shrink_dentry_list+0x195/0x510 fs/dcache.c:1201
+ shrink_dcache_parent+0x18c/0x240 fs/dcache.c:1628
+ vfs_rmdir fs/namei.c:4023 [inline]
+ vfs_rmdir+0x2b6/0x5d0 fs/namei.c:3996
+ do_rmdir+0x274/0x320 fs/namei.c:4080
+ __do_sys_rmdir fs/namei.c:4099 [inline]
+ __se_sys_rmdir fs/namei.c:4097 [inline]
+ __x64_sys_rmdir+0x3e/0x50 fs/namei.c:4097
+ do_syscall_x64 arch/x86/entry/common.c:50 [inline]
+ do_syscall_64+0x3b/0x90 arch/x86/entry/common.c:80
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+
+Second to last potentially related work creation:
+ kasan_save_stack+0x1e/0x40 mm/kasan/common.c:38
+ __kasan_record_aux_stack+0x97/0xa0 mm/kasan/generic.c:348
+ __call_rcu kernel/rcu/tree.c:3026 [inline]
+ call_rcu+0x76/0x820 kernel/rcu/tree.c:3106
+ dentry_free+0x115/0x140 fs/dcache.c:369
+ __dentry_kill+0x3be/0x540 fs/dcache.c:621
+ dentry_kill fs/dcache.c:745 [inline]
+ dput+0x36c/0x850 fs/dcache.c:913
+ handle_mounts fs/namei.c:1552 [inline]
+ step_into+0xb3a/0x1860 fs/namei.c:1850
+ walk_component+0x139/0x610 fs/namei.c:2026
+ lookup_last fs/namei.c:2475 [inline]
+ path_lookupat.isra.0+0x152/0x520 fs/namei.c:2499
+ filename_lookup+0x1bb/0x3e0 fs/namei.c:2528
+ user_path_at_empty+0x42/0x60 fs/namei.c:2851
+ user_path_at include/linux/namei.h:57 [inline]
+ vfs_statx+0x108/0x310 fs/stat.c:221
+ vfs_fstatat fs/stat.c:243 [inline]
+ vfs_lstat include/linux/fs.h:3287 [inline]
+ __do_sys_newlstat+0x8f/0x100 fs/stat.c:398
+ do_syscall_x64 arch/x86/entry/common.c:50 [inline]
+ do_syscall_64+0x3b/0x90 arch/x86/entry/common.c:80
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+
+The buggy address belongs to the object at ffff88800a767a00
+ which belongs to the cache dentry of size 192
+The buggy address is located 8 bytes inside of
+ 192-byte region [ffff88800a767a00, ffff88800a767ac0)
+The buggy address belongs to the page:
+page:00000000360646c8 refcount:1 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0xa767
+flags: 0x100000000000200(slab|node=0|zone=1)
+raw: 0100000000000200 ffffea00001aefc0 dead000000000002 ffff888001143b40
+raw: 0000000000000000 0000000000100010 00000001ffffffff 0000000000000000
+page dumped because: kasan: bad access detected
+
+Memory state around the buggy address:
+ ffff88800a767900: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+ ffff88800a767980: fb fb fb fb fb fb fb fb fc fc fc fc fc fc fc fc
+>ffff88800a767a00: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                      ^
+ ffff88800a767a80: fb fb fb fb fb fb fb fb fc fc fc fc fc fc fc fc
+ ffff88800a767b00: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+==================================================================
+general protection fault, probably for non-canonical address 0xf74bfc010000009a: 0000 [#1] PREEMPT SMP KASAN PTI
+KASAN: maybe wild-memory-access in range [0xba600008000004d0-0xba600008000004d7]
+CPU: 1 PID: 7504 Comm: syz-executor.7 Tainted: G    B             5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+RIP: 0010:bio_poll+0x90/0x330 block/blk-core.c:980
+Code: 48 c1 ea 03 80 3c 02 00 0f 85 58 02 00 00 48 b8 00 00 00 00 00 fc ff df 48 8b 5b 08 48 8d bb 40 03 00 00 48 89 fa 48 c1 ea 03 <80> 3c 02 00 0f 85 28 02 00 00 48 8b 9b 40 03 00 00 be 08 00 00 00
+RSP: 0018:ffff88802eda7828 EFLAGS: 00010a07
+RAX: dffffc0000000000 RBX: ba60000800000196 RCX: ffffffff898cf5c1
+RDX: 174c00010000009a RSI: 0000000000000008 RDI: ba600008000004d6
+RBP: 0000000000000000 R08: 0000000000000001 R09: fffffbfff1a97d61
+R10: ffffffff8d4beb07 R11: fffffbfff1a97d60 R12: ffff88802eda7900
+R13: ffff88802eda7900 R14: 0000000000000003 R15: ffff888004a7b8c0
+FS:  0000000000000000(0000) GS:ffff888068900000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 0000555556fc10b8 CR3: 00000000067ea005 CR4: 0000000000170ee0
+Call Trace:
+ <TASK>
+ iocb_bio_iopoll+0x77/0xb0 block/blk-core.c:1035
+ io_do_iopoll+0x256/0xe30 fs/io_uring.c:2629
+ io_iopoll_try_reap_events+0xa4/0xf6 fs/io_uring.c:2683
+ io_ring_ctx_wait_and_kill+0x15f/0x27e fs/io_uring.c:9675
+ io_uring_release+0x42/0x46 fs/io_uring.c:9692
+ __fput+0x21e/0x940 fs/file_table.c:317
+ task_work_run+0xe1/0x180 kernel/task_work.c:164
+ exit_task_work include/linux/task_work.h:32 [inline]
+ do_exit+0x979/0x2730 kernel/exit.c:806
+ do_group_exit+0xb5/0x2a0 kernel/exit.c:935
+ get_signal+0x382/0x1ca0 kernel/signal.c:2863
+ arch_do_signal_or_restart+0x2f8/0x17b0 arch/x86/kernel/signal.c:868
+ handle_signal_work kernel/entry/common.c:148 [inline]
+ exit_to_user_mode_loop kernel/entry/common.c:172 [inline]
+ exit_to_user_mode_prepare+0xe8/0x150 kernel/entry/common.c:207
+ __syscall_exit_to_user_mode_work kernel/entry/common.c:289 [inline]
+ syscall_exit_to_user_mode+0x1d/0x40 kernel/entry/common.c:300
+ do_syscall_64+0x48/0x90 arch/x86/entry/common.c:86
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+RIP: 0033:0x7f37b89a683d
+Code: Unable to access opcode bytes at RIP 0x7f37b89a6813.
+RSP: 002b:00007f37b7b18c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f37b8ac5f60 RCX: 00007f37b89a683d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f37b8ac5f68
+RBP: 00007f37b8ac5f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f37b8ac5f6c
+R13: 00007ffe81305d1f R14: 00007ffe81305ec0 R15: 00007f37b7b18d80
+ </TASK>
+Modules linked in:
+---[ end trace 0000000000000000 ]---
+RIP: 0010:bio_poll+0x90/0x330 block/blk-core.c:980
+Code: 48 c1 ea 03 80 3c 02 00 0f 85 58 02 00 00 48 b8 00 00 00 00 00 fc ff df 48 8b 5b 08 48 8d bb 40 03 00 00 48 89 fa 48 c1 ea 03 <80> 3c 02 00 0f 85 28 02 00 00 48 8b 9b 40 03 00 00 be 08 00 00 00
+RSP: 0018:ffff88802eda7828 EFLAGS: 00010a07
+RAX: dffffc0000000000 RBX: ba60000800000196 RCX: ffffffff898cf5c1
+RDX: 174c00010000009a RSI: 0000000000000008 RDI: ba600008000004d6
+RBP: 0000000000000000 R08: 0000000000000001 R09: fffffbfff1a97d61
+R10: ffffffff8d4beb07 R11: fffffbfff1a97d60 R12: ffff88802eda7900
+R13: ffff88802eda7900 R14: 0000000000000003 R15: ffff888004a7b8c0
+FS:  0000000000000000(0000) GS:ffff888068900000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 0000555556fc10b8 CR3: 00000000067ea005 CR4: 0000000000170ee0
+Fixing recursive fault but reboot is needed!
+BUG: using smp_processor_id() in preemptible [00000000] code: syz-executor.7/7504
+caller is __schedule+0x7c/0x18e0 kernel/sched/core.c:6191
+CPU: 1 PID: 7504 Comm: syz-executor.7 Tainted: G    B D           5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ check_preemption_disabled+0x103/0x110 lib/smp_processor_id.c:49
+ __schedule+0x7c/0x18e0 kernel/sched/core.c:6191
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f37b89a683d
+Code: Unable to access opcode bytes at RIP 0x7f37b89a6813.
+RSP: 002b:00007f37b7b18c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f37b8ac5f60 RCX: 00007f37b89a683d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f37b8ac5f68
+RBP: 00007f37b8ac5f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f37b8ac5f6c
+R13: 00007ffe81305d1f R14: 00007ffe81305ec0 R15: 00007f37b7b18d80
+ </TASK>
+BUG: scheduling while atomic: syz-executor.7/7504/0x00000000
+Modules linked in:
+Preemption disabled at:
+[<0000000000000000>] 0x0
+CPU: 1 PID: 7504 Comm: syz-executor.7 Tainted: G    B D           5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ __schedule_bug.cold+0x11e/0x12e kernel/sched/core.c:5539
+ schedule_debug kernel/sched/core.c:5566 [inline]
+ __schedule+0x11c5/0x18e0 kernel/sched/core.c:6195
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f37b89a683d
+Code: Unable to access opcode bytes at RIP 0x7f37b89a6813.
+RSP: 002b:00007f37b7b18c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f37b8ac5f60 RCX: 00007f37b89a683d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f37b8ac5f68
+RBP: 00007f37b8ac5f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f37b8ac5f6c
+R13: 00007ffe81305d1f R14: 00007ffe81305ec0 R15: 00007f37b7b18d80
+ </TASK>
+------------[ cut here ]------------
+Voluntary context switch within RCU read-side critical section!
+WARNING: CPU: 1 PID: 7504 at kernel/rcu/tree_plugin.h:318 rcu_note_context_switch+0xd8e/0x1660 kernel/rcu/tree_plugin.h:318
+Modules linked in:
+CPU: 1 PID: 7504 Comm: syz-executor.7 Tainted: G    B D W         5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+RIP: 0010:rcu_note_context_switch+0xd8e/0x1660 kernel/rcu/tree_plugin.h:318
+Code: df 48 c1 ea 03 80 3c 02 00 0f 85 d3 04 00 00 4c 89 2e e9 eb f9 ff ff 48 c7 c7 40 bd a6 8b c6 05 df f0 c9 03 01 e8 15 b4 4f 02 <0f> 0b e9 19 f3 ff ff 48 89 ef e8 f3 45 36 00 e9 bc f3 ff ff e8 09
+RSP: 0018:ffff88802eda7db8 EFLAGS: 00010082
+RAX: 0000000000000000 RBX: ffff8880689368c0 RCX: 0000000000000000
+RDX: ffff88802f52e480 RSI: 0000000000000000 RDI: ffffed1005db4fa9
+RBP: ffff88802f52e480 R08: 0000000000000001 R09: ffffed100d124eb2
+R10: ffff88806892758b R11: ffffed100d124eb1 R12: 0000000000000000
+R13: ffff88802f52e480 R14: 0000000000000000 R15: ffff888068935bc0
+FS:  0000000000000000(0000) GS:ffff888068900000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 0000555556fc10b8 CR3: 00000000067ea005 CR4: 0000000000170ee0
+Call Trace:
+ <TASK>
+ __schedule+0x132/0x18e0 kernel/sched/core.c:6201
+ do_task_dead+0x9b/0xc0 kernel/sched/core.c:6322
+ make_task_dead.cold+0xb1/0x1a8 kernel/exit.c:894
+ rewind_stack_and_make_dead+0x17/0x17 arch/x86/entry/entry_64.S:1439
+RIP: 0033:0x7f37b89a683d
+Code: Unable to access opcode bytes at RIP 0x7f37b89a6813.
+RSP: 002b:00007f37b7b18c98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007f37b8ac5f60 RCX: 00007f37b89a683d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007f37b8ac5f68
+RBP: 00007f37b8ac5f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007f37b8ac5f6c
+R13: 00007ffe81305d1f R14: 00007ffe81305ec0 R15: 00007f37b7b18d80
+ </TASK>
+---[ end trace 0000000000000000 ]---
+----------------
+Code disassembly (best guess):
+   0:	48 c1 ea 03          	shr    $0x3,%rdx
+   4:	80 3c 02 00          	cmpb   $0x0,(%rdx,%rax,1)
+   8:	0f 85 58 02 00 00    	jne    0x266
+   e:	48 b8 00 00 00 00 00 	movabs $0xdffffc0000000000,%rax
+  15:	fc ff df
+  18:	48 8b 5b 08          	mov    0x8(%rbx),%rbx
+  1c:	48 8d bb 40 03 00 00 	lea    0x340(%rbx),%rdi
+  23:	48 89 fa             	mov    %rdi,%rdx
+  26:	48 c1 ea 03          	shr    $0x3,%rdx
+* 2a:	80 3c 02 00          	cmpb   $0x0,(%rdx,%rax,1) <-- trapping instruction
+  2e:	0f 85 28 02 00 00    	jne    0x25c
+  34:	48 8b 9b 40 03 00 00 	mov    0x340(%rbx),%rbx
+  3b:	be 08 00 00 00       	mov    $0x8,%esi

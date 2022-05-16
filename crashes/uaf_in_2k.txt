@@ -1,0 +1,111 @@
+[   25.108353] I/O error, dev sr0, sector 256 op 0x0:(READ) flags 0x204000 phys_seg 2 prio class 2
+[   25.184624] ==================================================================
+[   25.190534] BUG: KASAN: use-after-free in iocb_bio_iopoll+0x98/0xa0
+[   25.192222] Read of size 8 at addr ffff888007282008 by task test2/254
+[   25.194491] 
+[   25.195057] CPU: 0 PID: 254 Comm: test2 Not tainted 5.18.0-rc2-00050-ga19944809fe9 #1
+[   25.197236] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.0-0-gd239552ce722-prebuilt.qemu.org 04/01/2014
+[   25.200195] Call Trace:
+[   25.200698]  <TASK>
+[   25.201228]  dump_stack_lvl+0x70/0x93
+[   25.202132]  print_report.cold.13+0x9c/0x694
+[   25.203414]  ? iocb_bio_iopoll+0x98/0xa0
+[   25.204497]  kasan_report+0xa5/0x120
+[   25.205870]  ? iocb_bio_iopoll+0x98/0xa0
+[   25.206963]  iocb_bio_iopoll+0x98/0xa0
+[   25.208338]  io_do_iopoll+0x2df/0xf90
+[   25.209801]  ? xas_find+0x379/0x670
+[   25.211108]  ? _raw_spin_lock+0x82/0xd0
+[   25.212519]  ? ctx_flush_and_put+0x230/0x230
+[   25.213694]  ? _raw_spin_unlock+0x34/0x50
+[   25.214707]  io_iopoll_try_reap_events+0xab/0x145
+[   25.216221]  io_ring_ctx_wait_and_kill+0x16f/0x28b
+[   25.217817]  ? io_iopoll_try_reap_events+0x145/0x145
+[   25.219671]  ? write_comp_data+0x1f/0x70
+[   25.220969]  ? io_ring_ctx_wait_and_kill+0x28b/0x28b
+[   25.222303]  io_uring_release+0x42/0x46
+[   25.223817]  __fput+0x24b/0x960
+[   25.224848]  task_work_run+0xe0/0x190
+[   25.225810]  do_exit+0x9dd/0x2bd0
+[   25.226527]  ? is_current_pgrp_orphaned+0x90/0x90
+[   25.227575]  ? find_vma+0x71/0x1e0
+[   25.228476]  ? up_read+0xf/0x90
+[   25.229123]  ? write_comp_data+0x1f/0x70
+[   25.229895]  do_group_exit+0xc4/0x2c0
+[   25.230756]  __x64_sys_exit_group+0x3a/0x50
+[   25.231697]  do_syscall_64+0x34/0x80
+[   25.232513]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+[   25.233723] RIP: 0033:0x7ff77811f618
+[   25.234471] Code: Unable to access opcode bytes at RIP 0x7ff77811f5ee.
+[   25.235970] RSP: 002b:00007ffe77a9eab8 EFLAGS: 00000246 ORIG_RAX: 00000000000000e7
+[   25.237795] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007ff77811f618
+[   25.239358] RDX: 0000000000000000 RSI: 000000000000003c RDI: 0000000000000000
+[   25.240727] RBP: 00007ff7783fc8e0 R08: 00000000000000e7 R09: fffffffffffffec8
+[   25.241929] R10: 00007ffe77a9ea38 R11: 0000000000000246 R12: 00007ff7783fc8e0
+[   25.243374] R13: 00007ff778401c20 R14: 0000000000000000 R15: 0000000000000000
+[   25.244905]  </TASK>
+[   25.245407] 
+[   25.245758] Allocated by task 110:
+[   25.246486]  kasan_save_stack+0x1c/0x40
+[   25.247302]  __kasan_kmalloc+0x84/0xa0
+[   25.248150]  sk_prot_alloc+0x120/0x2a0
+[   25.248985]  sk_alloc+0x30/0x820
+[   25.249707]  __netlink_create+0x5f/0x1f0
+[   25.250429]  netlink_create+0x3a8/0x5d0
+[   25.251653]  __sock_create+0x28a/0x500
+[   25.252965]  __sys_socket+0xec/0x1f0
+[   25.254200]  __x64_sys_socket+0x6f/0xb0
+[   25.255539]  do_syscall_64+0x34/0x80
+[   25.256819]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+[   25.258360] 
+[   25.258961] Freed by task 169:
+[   25.260030]  kasan_save_stack+0x1c/0x40
+[   25.261188]  kasan_set_track+0x21/0x30
+[   25.262028]  kasan_set_free_info+0x20/0x30
+[   25.263212]  __kasan_slab_free+0xe4/0x140
+[   25.264417]  kfree+0x77/0x2a0
+[   25.265381]  __sk_destruct+0x493/0x670
+[   25.266308]  sk_destruct+0x133/0x180
+[   25.267119]  __sk_free+0xef/0x3d0
+[   25.268062]  sk_free+0x78/0xa0
+[   25.269080]  deferred_put_nlk_sk+0x181/0x320
+[   25.270265]  rcu_core+0x8bb/0x16e0
+[   25.271078]  __do_softirq+0x1ac/0x5f4
+[   25.271902] 
+[   25.272267] Last potentially related work creation:
+[   25.273374]  kasan_save_stack+0x1c/0x40
+[   25.274415]  __kasan_record_aux_stack+0x98/0xa0
+[   25.275641]  call_rcu+0x6a/0x820
+[   25.276617]  netlink_release+0xde7/0x14d0
+[   25.277663]  __sock_release+0xc8/0x270
+[   25.278812]  sock_close+0x15/0x20
+[   25.279882]  __fput+0x24b/0x960
+[   25.280729]  task_work_run+0xe0/0x190
+[   25.282023]  do_exit+0x9dd/0x2bd0
+[   25.283209]  do_group_exit+0xc4/0x2c0
+[   25.284508]  __x64_sys_exit_group+0x3a/0x50
+[   25.285551]  do_syscall_64+0x34/0x80
+[   25.286477]  entry_SYSCALL_64_after_hwframe+0x44/0xae
+[   25.287913] 
+[   25.288464] The buggy address belongs to the object at ffff888007282000
+[   25.288464]  which belongs to the cache kmalloc-2k of size 2048
+[   25.293268] The buggy address is located 8 bytes inside of
+[   25.293268]  2048-byte region [ffff888007282000, ffff888007282800)
+[   25.297670] 
+[   25.298275] The buggy address belongs to the physical page:
+[   25.300371] page:ffffea00001ca000 refcount:1 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x7280
+[   25.304011] head:ffffea00001ca000 order:3 compound_mapcount:0 compound_pincount:0
+[   25.306842] flags: 0x100000000010200(slab|head|node=0|zone=1)
+[   25.308993] raw: 0100000000010200 ffffea00001cb600 dead000000000002 ffff888006442000
+[   25.312015] raw: 0000000000000000 0000000000080008 00000001ffffffff 0000000000000000
+[   25.314915] page dumped because: kasan: bad access detected
+[   25.317065] 
+[   25.317709] Memory state around the buggy address:
+[   25.319502]  ffff888007281f00: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+[   25.322034]  ffff888007281f80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+[   25.324926] >ffff888007282000: fa fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+[   25.327585]                       ^
+[   25.328915]  ffff888007282080: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+[   25.331790]  ffff888007282100: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+[   25.334247] ==================================================================
+[   25.337268] Disabling lock debugging due to kernel taint
