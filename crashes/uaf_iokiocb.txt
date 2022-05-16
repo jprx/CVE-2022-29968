@@ -1,0 +1,169 @@
+I/O error, dev sr0, sector 0 op 0x0:(READ) flags 0x204000 phys_seg 30 prio class 2
+==================================================================
+BUG: KASAN: use-after-free in iocb_bio_iopoll+0x9f/0xb0 block/blk-core.c:1034
+Read of size 8 at addr ffff88802c059408 by task syz-executor.5/8457
+
+CPU: 0 PID: 8457 Comm: syz-executor.5 Not tainted 5.17.0-rc6-00183-gb08968f196d4 #1
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+Call Trace:
+ <TASK>
+ __dump_stack lib/dump_stack.c:88 [inline]
+ dump_stack_lvl+0x4d/0x66 lib/dump_stack.c:106
+ print_address_description.constprop.0+0x21/0x150 mm/kasan/report.c:255
+ __kasan_report mm/kasan/report.c:442 [inline]
+ kasan_report.cold+0x7f/0x11b mm/kasan/report.c:459
+ iocb_bio_iopoll+0x9f/0xb0 block/blk-core.c:1034
+ io_do_iopoll+0x256/0xe30 fs/io_uring.c:2629
+ io_iopoll_try_reap_events+0xa4/0xf6 fs/io_uring.c:2683
+ io_ring_ctx_wait_and_kill+0x15f/0x27e fs/io_uring.c:9675
+ io_uring_release+0x42/0x46 fs/io_uring.c:9692
+ __fput+0x21e/0x940 fs/file_table.c:317
+ task_work_run+0xe1/0x180 kernel/task_work.c:164
+ exit_task_work include/linux/task_work.h:32 [inline]
+ do_exit+0x979/0x2730 kernel/exit.c:806
+ do_group_exit+0xb5/0x2a0 kernel/exit.c:935
+ get_signal+0x382/0x1ca0 kernel/signal.c:2863
+ arch_do_signal_or_restart+0x2f8/0x17b0 arch/x86/kernel/signal.c:868
+ handle_signal_work kernel/entry/common.c:148 [inline]
+ exit_to_user_mode_loop kernel/entry/common.c:172 [inline]
+ exit_to_user_mode_prepare+0xe8/0x150 kernel/entry/common.c:207
+ __syscall_exit_to_user_mode_work kernel/entry/common.c:289 [inline]
+ syscall_exit_to_user_mode+0x1d/0x40 kernel/entry/common.c:300
+ do_syscall_64+0x48/0x90 arch/x86/entry/common.c:86
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+RIP: 0033:0x7fca17fba83d
+Code: Unable to access opcode bytes at RIP 0x7fca17fba813.
+RSP: 002b:00007fca1712cc98 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007fca180d9f60 RCX: 00007fca17fba83d
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007fca180d9f68
+RBP: 00007fca180d9f68 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 00007fca180d9f6c
+R13: 00007fff493bd7df R14: 00007fff493bd980 R15: 00007fca1712cd80
+ </TASK>
+
+Allocated by task 6689:
+ kasan_save_stack+0x1e/0x40 mm/kasan/common.c:38
+ kasan_set_track mm/kasan/common.c:45 [inline]
+ set_alloc_info mm/kasan/common.c:436 [inline]
+ __kasan_slab_alloc+0x66/0x80 mm/kasan/common.c:469
+ kasan_slab_alloc include/linux/kasan.h:260 [inline]
+ slab_post_alloc_hook mm/slab.h:732 [inline]
+ kmem_cache_alloc_bulk+0x181/0x2e0 mm/slub.c:3730
+ __io_alloc_req_refill fs/io_uring.c:2072 [inline]
+ io_alloc_req_refill fs/io_uring.c:2098 [inline]
+ io_submit_sqes.cold+0x1c5/0x3d9 fs/io_uring.c:7441
+ __do_sys_io_uring_enter fs/io_uring.c:10162 [inline]
+ __se_sys_io_uring_enter fs/io_uring.c:10104 [inline]
+ __x64_sys_io_uring_enter+0x4d8/0xa20 fs/io_uring.c:10104
+ do_syscall_x64 arch/x86/entry/common.c:50 [inline]
+ do_syscall_64+0x3b/0x90 arch/x86/entry/common.c:80
+ entry_SYSCALL_64_after_hwframe+0x44/0xae
+
+The buggy address belongs to the object at ffff88802c0593c0
+ which belongs to the cache io_kiocb of size 232
+The buggy address is located 72 bytes inside of
+ 232-byte region [ffff88802c0593c0, ffff88802c0594a8)
+The buggy address belongs to the page:
+page:000000009b1bfb74 refcount:1 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x2c059
+flags: 0x100000000000200(slab|node=0|zone=1)
+raw: 0100000000000200 ffffea000011ee00 dead000000000003 ffff8880031f6140
+raw: 0000000000000000 00000000800c000c 00000001ffffffff 0000000000000000
+page dumped because: kasan: bad access detected
+
+Memory state around the buggy address:
+ ffff88802c059300: fb fb fb fb fb fb fb fb fb fb fb fb fb fc fc fc
+ ffff88802c059380: fc fc fc fc fc fc fc fc fb fb fb fb fb fb fb fb
+>ffff88802c059400: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                      ^
+ ffff88802c059480: fb fb fb fb fb fc fc fc fc fc fc fc fc fc fc fc
+ ffff88802c059500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+==================================================================
+I/O error, dev sr0, sector 15448 op 0x0:(READ) flags 0x204000 phys_seg 4 prio class 2
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 4 bytes leftover after parsing attributes in process `syz-executor.3'.
+nfs4: Unknown parameter '0xffffffffffffffff'
+nfs4: Unknown parameter '0xffffffffffffffff'
+nfs4: Unknown parameter '0xffffffffffffffff'
+Attempt to set a LOCK_MAND lock via flock(2). This support has been removed and the request ignored.
+tmpfs: Unknown parameter 'trans'
+tmpfs: Unknown parameter 'trans'
+tmpfs: Unknown parameter 'trans'
+tmpfs: Unknown parameter 'trans'
+audit: type=1326 audit(2000001441.084:221): auid=0 uid=0 gid=0 ses=4 subj=system_u:system_r:kernel_t:s0 pid=9444 comm="syz-executor.1" exe="/syz-executor.1" sig=31 arch=c000003e syscall=202 compat=0 ip=0x7f354928f83d code=0x0
+ext4: Unknown parameter 'fscontexconvext'
+ext4: Unknown parameter 'fscontexconvext'
+ext4: Unknown parameter 'fscontexconvext'
+ext4: Unknown parameter 'fscontexconvext'
+audit: type=1326 audit(2000001441.934:222): auid=0 uid=0 gid=0 ses=4 subj=system_u:system_r:kernel_t:s0 pid=9506 comm="syz-executor.1" exe="/syz-executor.1" sig=31 arch=c000003e syscall=202 compat=0 ip=0x7f354928f83d code=0x0
+__nla_validate_parse: 30 callbacks suppressed
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+SELinux: unrecognized netlink message: protocol=0 nlmsg_type=2579 sclass=netlink_route_socket pid=9528 comm=syz-executor.3
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+SELinux: unrecognized netlink message: protocol=0 nlmsg_type=2579 sclass=netlink_route_socket pid=9544 comm=syz-executor.3
+netlink: 88 bytes leftover after parsing attributes in process `syz-executor.5'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+SELinux: unrecognized netlink message: protocol=0 nlmsg_type=2579 sclass=netlink_route_socket pid=9559 comm=syz-executor.3
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+netlink: 8 bytes leftover after parsing attributes in process `syz-executor.3'.
+audit: type=1326 audit(2000001442.782:223): auid=0 uid=0 gid=0 ses=4 subj=system_u:system_r:kernel_t:s0 pid=9566 comm="syz-executor.1" exe="/syz-executor.1" sig=31 arch=c000003e syscall=202 compat=0 ip=0x7f354928f83d code=0x0
+EXT4-fs: Ignoring removed bh option
+ext3: Unknown parameter 'fowner'
+EXT4-fs: Ignoring removed bh option
+ext3: Unknown parameter 'fowner'
+audit: type=1326 audit(2000001442.884:224): auid=0 uid=0 gid=0 ses=4 subj=system_u:system_r:kernel_t:s0 pid=9566 comm="syz-executor.1" exe="/syz-executor.1" sig=31 arch=c000003e syscall=202 compat=0 ip=0x7f354928f83d code=0x0
+EXT4-fs: Ignoring removed bh option
+ext3: Unknown parameter 'fowner'
+9pnet_fd: Insufficient options for proto=fd
+cgroup2: Unknown parameter 'qid?'
+cgroup2: Unknown parameter 'qid?'
+cgroup2: Unknown parameter 'qid?'
+scsi_io_completion_action: 3 callbacks suppressed
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 00 00 00 00 40 00
+critical target error, dev sr0, sector 0 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 00 40 00 00 40 00
+critical target error, dev sr0, sector 256 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 00 80 00 00 40 00
+critical target error, dev sr0, sector 512 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 00 c0 00 00 40 00
+critical target error, dev sr0, sector 768 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 01 00 00 00 40 00
+critical target error, dev sr0, sector 1024 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 01 40 00 00 40 00
+critical target error, dev sr0, sector 1280 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 FAILED Result: hostbyte=DID_OK driverbyte=DRIVER_OK cmd_age=0s
+sr 1:0:0:0: [sr0] tag#0 Sense Key : Illegal Request [current] 
+sr 1:0:0:0: [sr0] tag#0 Add. Sense: Invalid command operation code
+sr 1:0:0:0: [sr0] tag#0 CDB: Write(10) 2a 00 00 00 01 80 00 00 40 00
+critical target error, dev sr0, sector 1536 op 0x1:(WRITE) flags 0xc800 phys_seg 33 prio class 2
+sr 1:0:0:0: [sr0] tag#0 unaligned transfer
+I/O error, dev sr0, sector 1792 op 0x1:(WRITE) flags 0x8800 phys_seg 32 prio class 2
